@@ -213,6 +213,7 @@ const STYLE = `
     .sbm-stats span { font-size: 11px; color: #aaa; }
     .sbm-pending-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
     .sbm-pending-item select { flex: 1; background: #0f0f0f; color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 6px; }
+    .sbm-pending-item .sbm-pending-category { flex: 1; color: #ff1684; font-size: 13px; font-weight: 600; }
     .sbm-pending-item .sbm-time { font-variant-numeric: tabular-nums; font-size: 12px; color: #ccc; min-width: 92px; }
     .sbm-pending-item button.sbm-del { background: none; border: none; color: #ff6b6b; font-size: 18px; }
     .sbm-mark-row { display: flex; gap: 8px; margin-top: 10px; }

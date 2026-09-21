@@ -16,15 +16,22 @@ export function closeSubmit(): void {
 
 export function renderSubmitSheet(): void {
     const list = h('div', {}, PlaybackState.pendingSubmission.map((seg, idx) => {
-        const select = h('select', {
-            onchange: (e: Event) => { seg.category = (e.target as HTMLSelectElement).value; },
-        }, CATEGORIES.filter((c) => !c.isPoi).map((c) =>
-            h('option', Object.assign({ value: c.key, text: c.name }, c.key === seg.category ? { selected: 'selected' } : {}))
-        ));
+        // A highlight is a single point in time with exactly one category
+        // ("Highlight") — there's nothing to pick, so show a fixed label
+        // instead of a category dropdown, and a single timestamp instead
+        // of a start → end range.
+        const isPoi = seg.actionType === 'poi';
+        const categoryControl = isPoi
+            ? h('span', { class: 'sbm-pending-category', text: 'Highlight' })
+            : h('select', {
+                onchange: (e: Event) => { seg.category = (e.target as HTMLSelectElement).value; },
+            }, CATEGORIES.filter((c) => !c.isPoi).map((c) =>
+                h('option', Object.assign({ value: c.key, text: c.name }, c.key === seg.category ? { selected: 'selected' } : {}))
+            ));
 
         return h('div', { class: 'sbm-pending-item' }, [
-            h('span', { class: 'sbm-time', text: `${formatTime(seg.start)} → ${formatTime(seg.end)}` }),
-            select,
+            h('span', { class: 'sbm-time', text: isPoi ? formatTime(seg.start) : `${formatTime(seg.start)} → ${formatTime(seg.end)}` }),
+            categoryControl,
             h('button', { class: 'sbm-del', text: '✕', onclick: () => {
                 PlaybackState.pendingSubmission.splice(idx, 1);
                 renderSubmitSheet();
@@ -45,9 +52,12 @@ export function renderSubmitSheet(): void {
         renderSubmitSheet();
     } });
 
+    // A highlight has no "end" to set — it's a single point in time — so
+    // this only applies to the most recent *non-highlight* pending segment.
     const editCurrent = PlaybackState.pendingSubmission[PlaybackState.pendingSubmission.length - 1];
+    const canEditEnd = editCurrent && editCurrent.actionType !== 'poi';
     const setEndBtn = h('button', { class: 'sbm-btn-secondary', text: 'Set end = now', onclick: () => {
-        if (!video || !editCurrent) return;
+        if (!video || !canEditEnd) return;
         editCurrent.end = video.currentTime;
         renderSubmitSheet();
     } });
@@ -74,7 +84,7 @@ export function renderSubmitSheet(): void {
     const sheet = h('div', { class: 'sbm-sheet' }, [
         h('h2', {}, [document.createTextNode('Submit a segment'), h('button', { class: 'sbm-close', text: '✕', onclick: closeSubmit })]),
         h('div', { class: 'sbm-mark-row' }, [markStart, markHighlight]),
-        editCurrent ? h('div', { class: 'sbm-mark-row' }, [setEndBtn]) : null,
+        canEditEnd ? h('div', { class: 'sbm-mark-row' }, [setEndBtn]) : null,
         list,
         submitBtn,
     ]);
