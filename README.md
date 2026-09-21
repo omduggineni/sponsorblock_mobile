@@ -40,7 +40,8 @@ no dependencies at install time. It's built from the TypeScript sources in `src/
 - **Colored segments on the seek bar** — matches the official extension's category colors.
 - **Settings panel** — a `⚙` button opens per-category controls (Off / Manual / Auto-skip), a master
   enable switch, a seek-bar-overlay toggle, a server address override, and running stats (segments
-  skipped, time saved).
+  skipped, time saved). Each category name shows a small color swatch matching its color on the seek
+  bar, so it's easy to tell them apart at a glance.
 - **Nothing floats on screen until you ask for it** — a small SponsorBlock icon (⏭) sits in the same
   row as YouTube's own like/dislike/share/save/report buttons, below the title. The settings and
   submit buttons only appear (as a small floating pair, bottom-right) once you tap it, and tapping it

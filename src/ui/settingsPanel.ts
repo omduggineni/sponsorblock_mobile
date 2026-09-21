@@ -41,7 +41,10 @@ export function openSettings(): void {
 
         return h('div', { class: 'sbm-row' }, [
             h('div', { class: 'sbm-row-label' }, [
-                h('b', { text: cat.name }),
+                h('b', {}, [
+                    cat.name,
+                    h('sup', { class: 'sbm-cat-swatch', style: `background:${cat.color};` }),
+                ]),
                 h('a', {
                     href: `https://wiki.sponsor.ajay.app/w/${encodeURIComponent(cat.name.replace(/ /g, '_'))}`,
                     target: '_blank',

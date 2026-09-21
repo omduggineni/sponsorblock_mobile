@@ -148,6 +148,14 @@ const STYLE = `
     .sbm-row-label { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
     .sbm-row-label b { font-size: 14px; }
     .sbm-row-label a { color: #3ea6ff; font-size: 11px; text-decoration: none; }
+    .sbm-cat-swatch {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        margin-left: 6px;
+        vertical-align: super;
+        border-radius: 1px;
+    }
     .sbm-seg-toggle {
         display: flex;
         border-radius: 999px;
