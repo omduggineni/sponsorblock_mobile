@@ -50,8 +50,10 @@ of the desktop extension. Deliberately out of scope:
   here.
 
 Default category behavior (all changeable in Settings): `sponsor`, `selfpromo`, `interaction`,
-`intro`, `outro` auto-skip; `preview`, `hook`, `poi_highlight` show a manual control; `filler` and
-`music_offtopic` are off by default since they're the most subjective categories.
+`intro`, `outro` auto-skip; `poi_highlight` shows a manual control; `preview`, `hook`, `filler`, and
+`music_offtopic` are off by default — they're the most subjective/marginal categories, and a manual
+skip button is only useful once you've deliberately turned it on for one, rather than appearing
+unprompted on a fresh install.
 
 ## How it talks to SponsorBlock
 
