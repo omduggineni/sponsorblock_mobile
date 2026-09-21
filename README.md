@@ -164,6 +164,12 @@ npm run build       # type-checks, then rebuilds sponsorblock-mobile.user.js
 npm run typecheck   # type-check only, no build
 ```
 
+A [GitHub Actions workflow](.github/workflows/build-check.yml) enforces the "always rebuild and commit"
+rule on every push/PR: it type-checks, rebuilds from source, and fails if the committed
+`sponsorblock-mobile.user.js` doesn't match the fresh build byte-for-byte, plus a few sanity checks on
+the built file itself (valid JS, an intact `// ==UserScript==` metadata block, and no reintroduced
+top-level `"use strict"` directive — see the compatibility note above for why that one matters).
+
 ## Credit
 
 Built with the [ajayyy/SponsorBlock](https://github.com/ajayyy/SponsorBlock) source as a reference for

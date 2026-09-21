@@ -1,0 +1,73 @@
+name: Build check
+
+# The installable artifact is sponsorblock-mobile.user.js itself, committed
+# at the repo root rather than produced by a release step — see the
+# "Development" section of the README. That only works if it's never left
+# out of sync with src/, so this workflow rebuilds from source on every
+# push/PR and fails if the result doesn't match what's committed, on top of
+# the usual type-check and a few sanity checks on the built file itself.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Build
+        run: node build.mjs
+
+      - name: Committed sponsorblock-mobile.user.js matches a fresh build
+        run: |
+          if ! git diff --quiet -- sponsorblock-mobile.user.js; then
+            echo "::error::sponsorblock-mobile.user.js is out of date with src/. Run 'npm run build' and commit the result." >&2
+            git diff -- sponsorblock-mobile.user.js
+            exit 1
+          fi
+
+      - name: Built file is valid JavaScript
+        run: node --check sponsorblock-mobile.user.js
+
+      - name: UserScript metadata block is intact
+        run: |
+          set -e
+          first_line=$(head -n 1 sponsorblock-mobile.user.js)
+          if [ "$first_line" != "// ==UserScript==" ]; then
+            echo "::error::First line must be exactly '// ==UserScript==', got: $first_line" >&2
+            exit 1
+          fi
+          for directive in '// ==/UserScript==' '// @name' '// @version' '// @match'; do
+            if ! grep -qF "$directive" sponsorblock-mobile.user.js; then
+              echo "::error::Missing expected metadata directive: $directive" >&2
+              exit 1
+            fi
+          done
+
+      - name: No leftover top-level "use strict" directive
+        run: |
+          # esbuild adds this automatically when bundling ESM to IIFE; it's
+          # stripped by build.mjs because it breaks injection under
+          # userscript managers (e.g. quoid/userscripts on Safari) that wrap
+          # @grant'd scripts as Function(paramList, code) with a
+          # non-simple parameter list — see build.mjs and the README's
+          # "Userscript manager compatibility" section for the full story.
+          if grep -qF '"use strict"' sponsorblock-mobile.user.js; then
+            echo '::error::Found a "use strict" directive in the built file — this breaks script injection on some userscript managers. build.mjs should have stripped it.' >&2
+            exit 1
+          fi
