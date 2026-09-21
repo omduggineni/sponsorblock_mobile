@@ -558,6 +558,7 @@
         videoID: null,
         segments: [],
         overriddenUUIDs: new Set(), // segments the user chose to un-skip / watch anyway, for this video
+        autoSkippedUUIDs: new Set(), // segments already auto-skipped once this video (don't re-trigger even if the landed time is still nominally "inside" the segment, e.g. an end-of-video safety clamp)
         shownManualUUIDs: new Set(), // manual-skip buttons already dismissed once (avoid re-popping mid-segment)
         poiShown: false,
         poiAutoJumped: false,
@@ -575,6 +576,7 @@
         PlaybackState.videoID = newVideoID;
         PlaybackState.segments = [];
         PlaybackState.overriddenUUIDs = new Set();
+        PlaybackState.autoSkippedUUIDs = new Set();
         PlaybackState.shownManualUUIDs = new Set();
         PlaybackState.poiShown = false;
         PlaybackState.poiAutoJumped = false;
@@ -686,8 +688,9 @@
                 const video = getVideo();
                 if (video) {
                     const from = video.currentTime;
-                    video.currentTime = chainEnd;
-                    Config.addStats(chainEnd - from);
+                    const target = safeSeekTarget(chainEnd, video);
+                    video.currentTime = target;
+                    Config.addStats(target - from);
                     markViewed(segment.uuid, PlaybackState.videoID);
                 }
                 PlaybackState.shownManualUUIDs.add(segment.uuid);
@@ -827,21 +830,36 @@
         for (let i = index + 1; i < sortedSkipSegments.length; i++) {
             const seg = sortedSkipSegments[i];
             if (seg.start > end + 0.5) break;
-            // Don't fold in a segment whose category the user disabled, or
-            // one they've already chosen to watch anyway (Undo) — chaining
-            // must never skip through content the user opted out of.
-            if (activeCategoryAction(seg.category) === 'off' || PlaybackState.overriddenUUIDs.has(seg.uuid)) continue;
+            // Only fold in segments that are ALSO set to auto-skip. Chaining
+            // must never silently skip through a segment the user disabled,
+            // chose to watch anyway (Undo), or wants to approve manually
+            // (notify) — those still need their own pass through tick().
+            if (activeCategoryAction(seg.category) !== 'skip') continue;
+            if (PlaybackState.overriddenUUIDs.has(seg.uuid)) continue;
             end = Math.max(end, seg.end);
             involved.push(seg);
         }
         return { end, involved };
     }
 
+    // Seeking to within a fraction of a second of a video's true duration can
+    // leave YouTube's mobile player stuck in a "seeking" state forever
+    // (currentTime updates, but it never resumes playback or fires `ended`,
+    // so nothing visually happens). A segment that runs to the end of the
+    // video is effectively "skip to the end" anyway, so land safely short of
+    // the boundary instead of exactly on it.
+    const END_OF_VIDEO_SEEK_MARGIN = 0.75;
+
+    function safeSeekTarget(time, video) {
+        if (isFinite(video.duration) && video.duration > 0 && time >= video.duration - END_OF_VIDEO_SEEK_MARGIN) {
+            return Math.max(0, video.duration - END_OF_VIDEO_SEEK_MARGIN);
+        }
+        return time;
+    }
+
     /* ------------------------------------------------------------------ *
      *  Main per-frame check
      * ------------------------------------------------------------------ */
-
-    let lastAutoSkipGuardTime = -1;
 
     function activeCategoryAction(category) {
         return Config.categoryActions[category] || 'off';
@@ -890,16 +908,21 @@
             const action = activeCategoryAction(seg.category);
             if (action === 'off') continue;
             if (PlaybackState.overriddenUUIDs.has(seg.uuid)) continue;
+            if (action === 'skip' && PlaybackState.autoSkippedUUIDs.has(seg.uuid)) continue;
             if (t < seg.start - SKIP_EPSILON || t >= seg.end) continue;
 
             if (action === 'skip') {
-                if (t === lastAutoSkipGuardTime) continue;
                 const { end, involved } = chainSkipSegments(skipSegs, i);
                 if (end <= t) continue;
                 const from = t;
-                video.currentTime = end;
-                lastAutoSkipGuardTime = end;
-                Config.addStats(end - from);
+                const target = safeSeekTarget(end, video);
+                video.currentTime = target;
+                // Mark every involved segment as handled even though the
+                // end-of-video safety clamp can land us back inside its
+                // numeric range — otherwise the next tick sees "still inside
+                // an un-skipped segment" and re-fires, causing a seek loop.
+                for (const s of involved) PlaybackState.autoSkippedUUIDs.add(s.uuid);
+                Config.addStats(target - from);
                 showSkipToast(involved, from);
                 for (const s of involved) markViewed(s.uuid, PlaybackState.videoID);
                 return;
