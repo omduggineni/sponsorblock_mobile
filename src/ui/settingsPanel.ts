@@ -104,7 +104,7 @@ export function openSettings(): void {
             closeSettings();
             openSettings();
         } }),
-        h('h2', { style: 'margin-top:18px;font-size:14px;color:#aaa;' }, [document.createTextNode('Categories')]),
+        h('div', { class: 'sbm-section-label', text: 'Categories' }),
         ...rows,
         h('div', { class: 'sbm-row-label', style: 'margin-top:14px;' }, [
             h('b', { text: 'Server address' }),

@@ -1,6 +1,6 @@
 {
   "name": "sponsorblock-mobile",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "private": true,
   "description": "SponsorBlock userscript for m.youtube.com, built from TypeScript modules into a single .user.js",
   "scripts": {

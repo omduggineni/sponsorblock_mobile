@@ -145,6 +145,14 @@ const STYLE = `
         align-items: center;
     }
     .sbm-sheet h2 button.sbm-close { background: none; border: none; color: #aaa; font-size: 20px; padding: 4px 8px; }
+    .sbm-section-label {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: #888;
+        margin: 22px 0 4px;
+    }
     .sbm-row {
         display: flex;
         align-items: center;
