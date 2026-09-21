@@ -74,6 +74,14 @@ const STYLE = `
         bottom: 0;
         opacity: 0.75;
     }
+    .sbm-progress-poi {
+        position: absolute;
+        top: -3px;
+        bottom: -3px;
+        width: 3px;
+        margin-left: -1.5px;
+        border-radius: 1px;
+    }
     .sbm-fab-row {
         position: fixed;
         right: 10px;

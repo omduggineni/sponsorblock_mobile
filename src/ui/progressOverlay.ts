@@ -58,9 +58,19 @@ export function ensureProgressOverlay(): void {
     while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
     const duration = video.duration;
     for (const seg of PlaybackState.segments) {
-        if (seg.actionType === 'poi') continue;
         const cat = CATEGORY_MAP.get(seg.category);
         const leftPct = Math.max(0, (seg.start / duration) * 100);
+        if (seg.actionType === 'poi') {
+            // A highlight is a single point in time, not a range — render
+            // it as a small marker poking above/below the bar rather than
+            // a (near-invisible) sliver the same height as a real segment.
+            const marker = h('div', {
+                class: 'sbm-progress-poi',
+                style: `left:${leftPct}%;background:${cat ? cat.color : '#fff'};`,
+            });
+            overlay.appendChild(marker);
+            continue;
+        }
         const widthPct = Math.max(0.3, ((seg.end - seg.start) / duration) * 100);
         const bar = h('div', {
             class: 'sbm-progress-seg',
