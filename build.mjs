@@ -14,7 +14,7 @@ await esbuild.build({
     format: 'iife',
     target: 'es2020',
     charset: 'utf8',
-    minify: false,
+    minify: true,
     legalComments: 'none',
     banner: { js: metadata },
 });
