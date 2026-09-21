@@ -1,5 +1,5 @@
 import { CATEGORIES } from './constants';
-import { Config, hasGM, initConfig } from './config';
+import { Config, initConfig } from './config';
 import { reportError } from './errorReporting';
 import { fetchSegments } from './sponsorblock-api';
 import { injectStyles } from './styles';
@@ -10,21 +10,27 @@ import { openSettings } from './ui/settingsPanel';
 import { renderSubmitSheet } from './ui/submissionSheet';
 import { getVideoIDFromURL } from './youtube';
 
-function main(): void {
+async function main(): Promise<void> {
     if (window.__sbMobileLoaded) return;
     window.__sbMobileLoaded = true;
 
     // Only run in the top-level document; YouTube embeds ad/auth iframes
     // that match our @match patterns but have nothing for us to do.
-    if (window.top !== window) return;
+    // window.frameElement (a DOM property, null outside any <iframe>)
+    // rather than a window.top identity comparison: some userscript
+    // managers run scripts with @grant in an isolated JS world where
+    // `window` is not the same object the page itself sees, which can
+    // make identity checks like `window.top !== window` behave
+    // unpredictably. frameElement doesn't depend on that identity.
+    if (window.frameElement) return;
 
     // Different userscript managers (and versions of them) implement GM_*
     // APIs slightly differently, in ways this project can't fully test
-    // against. None of these three steps should ever be able to stop the
-    // script from booting, so each is isolated: a failure in one is logged
-    // and skipped rather than aborting everything after it.
+    // against. None of these steps should ever be able to stop the script
+    // from booting, so each is isolated: a failure in one is logged and
+    // skipped rather than aborting everything after it.
     try {
-        initConfig();
+        await initConfig();
     } catch (e) {
         reportError('initConfig', e);
     }
@@ -36,7 +42,7 @@ function main(): void {
     }
 
     try {
-        if (hasGM && typeof GM_registerMenuCommand === 'function') {
+        if (typeof GM_registerMenuCommand === 'function') {
             GM_registerMenuCommand('SponsorBlock Settings', openSettings);
             GM_registerMenuCommand('Submit a segment', renderSubmitSheet);
         }
@@ -66,8 +72,4 @@ function boot(): void {
     }
 }
 
-try {
-    main();
-} catch (e) {
-    reportError('main', e);
-}
+main().catch((e) => reportError('main', e));

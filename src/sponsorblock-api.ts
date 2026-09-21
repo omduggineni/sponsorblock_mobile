@@ -1,4 +1,4 @@
-import { Config, hasGM } from './config';
+import { Config } from './config';
 import { CATEGORY_KEYS, USER_AGENT } from './constants';
 import type { PendingSegment, RequestResult, Segment } from './types';
 
@@ -28,16 +28,32 @@ function request(method: string, path: string, { params, body, headers }: Reques
     const url = Config.serverAddress + path + buildQuery(params);
     const finalHeaders = Object.assign({ 'X-Client-Name': USER_AGENT }, headers || {});
 
-    if (hasGM && typeof GM_xmlhttpRequest === 'function') {
+    // GM_xmlhttpRequest availability is independent of which storage API
+    // (if any) a manager grants — check it directly rather than coupling
+    // to hasGM*Storage.
+    if (typeof GM_xmlhttpRequest === 'function') {
         return new Promise((resolve) => {
+            // Some managers have (or have had) bugs where onerror/ontimeout
+            // never fire for a failed request, which would otherwise hang
+            // this Promise — and anything awaiting it — forever. A safety
+            // timeout guarantees this always eventually settles.
+            let settled = false;
+            const finish = (result: RequestResult) => {
+                if (settled) return;
+                settled = true;
+                clearTimeout(safetyTimer);
+                resolve(result);
+            };
+            const safetyTimer = setTimeout(() => finish({ status: 0, text: '' }), 20000);
+
             GM_xmlhttpRequest({
                 method,
                 url,
                 headers: body ? Object.assign({ 'Content-Type': 'application/json' }, finalHeaders) : finalHeaders,
                 data: body ? JSON.stringify(body) : undefined,
-                onload: (res) => resolve({ status: res.status, text: res.responseText }),
-                onerror: () => resolve({ status: 0, text: '' }),
-                ontimeout: () => resolve({ status: 0, text: '' }),
+                onload: (res) => finish({ status: res.status, text: res.responseText }),
+                onerror: () => finish({ status: 0, text: '' }),
+                ontimeout: () => finish({ status: 0, text: '' }),
             });
         });
     }

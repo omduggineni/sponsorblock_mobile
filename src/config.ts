@@ -1,12 +1,26 @@
 import { CATEGORIES, DEFAULT_SERVER, STORAGE_PREFIX } from './constants';
 import type { CategoryAction, Stats } from './types';
 
-export const hasGM = typeof GM_getValue === 'function' && typeof GM_setValue === 'function';
+// Different userscript managers implement storage differently:
+// Tampermonkey/Violentmonkey grant the legacy underscore-named globals
+// (GM_getValue/GM_setValue), which may return a value directly or a
+// Promise. Others — quoid/userscripts, Greasemonkey 4+ — only ever grant
+// the modern dot-namespaced `GM.getValue`/`GM.setValue`, which are always
+// Promise-based. `await`ing the result works either way (awaiting a
+// non-Promise value just resolves immediately with it), so both
+// conventions are supported through one code path, preferring the modern
+// one when both happen to be present.
+export const hasGMAsyncStorage = typeof GM !== 'undefined' && !!GM && typeof GM.getValue === 'function' && typeof GM.setValue === 'function';
+export const hasGMSyncStorage = typeof GM_getValue === 'function' && typeof GM_setValue === 'function';
 
-export function storageGet<T>(key: string, fallback: T): T {
+export async function storageGet<T>(key: string, fallback: T): Promise<T> {
     try {
-        if (hasGM) {
-            const v = GM_getValue<T | undefined>(key, undefined);
+        if (hasGMAsyncStorage) {
+            const v = await GM!.getValue!<T | undefined>(key, undefined);
+            return v === undefined ? fallback : v;
+        }
+        if (hasGMSyncStorage) {
+            const v = await GM_getValue<T | undefined>(key, undefined);
             return v === undefined ? fallback : v;
         }
         const raw = localStorage.getItem(STORAGE_PREFIX + key);
@@ -16,13 +30,17 @@ export function storageGet<T>(key: string, fallback: T): T {
     }
 }
 
-export function storageSet(key: string, value: unknown): void {
+export async function storageSet(key: string, value: unknown): Promise<void> {
     try {
-        if (hasGM) {
-            GM_setValue(key, value);
-        } else {
-            localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value));
+        if (hasGMAsyncStorage) {
+            await GM!.setValue!(key, value);
+            return;
         }
+        if (hasGMSyncStorage) {
+            await GM_setValue(key, value);
+            return;
+        }
+        localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value));
     } catch (e) {
         /* ignore quota / privacy-mode errors */
     }
@@ -91,14 +109,14 @@ export const Config: ConfigShape = {
 // Loads persisted settings, generating and storing a userID on first run.
 // Called explicitly from main.ts, after the top-level guards, so that
 // nothing here ever touches storage from inside an iframe.
-export function initConfig(): void {
-    Config.enabled = storageGet('enabled', true);
-    Config.serverAddress = storageGet('serverAddress', DEFAULT_SERVER);
-    Config.categoryActions = Object.assign(defaultCategoryActions(), storageGet('categoryActions', {}));
-    Config.userID = storageGet<string | null>('userID', null);
-    Config.minDuration = storageGet('minDuration', 0);
-    Config.stats = storageGet('stats', { segmentsSkipped: 0, secondsSaved: 0 });
-    Config.showProgressBarSegments = storageGet('showProgressBarSegments', true);
+export async function initConfig(): Promise<void> {
+    Config.enabled = await storageGet('enabled', true);
+    Config.serverAddress = await storageGet('serverAddress', DEFAULT_SERVER);
+    Config.categoryActions = Object.assign(defaultCategoryActions(), await storageGet('categoryActions', {}));
+    Config.userID = await storageGet<string | null>('userID', null);
+    Config.minDuration = await storageGet('minDuration', 0);
+    Config.stats = await storageGet('stats', { segmentsSkipped: 0, secondsSaved: 0 });
+    Config.showProgressBarSegments = await storageGet('showProgressBarSegments', true);
 
     if (!Config.userID) {
         Config.userID = generateUserID();

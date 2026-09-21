@@ -1,16 +1,22 @@
 # SponsorBlock for YouTube Mobile
 
-A single-file [Tampermonkey](https://www.tampermonkey.net/) userscript that brings SponsorBlock to
-`m.youtube.com` (the mobile web player). It talks to the same public, crowdsourced database as the
+A single-file userscript that brings SponsorBlock to `m.youtube.com` (the mobile web player). It talks
+to the same public, crowdsourced database as the
 [official SponsorBlock extension](https://github.com/ajayyy/SponsorBlock) — this is an independent,
 community port built for touch screens, not an official SponsorBlock release.
 
+Works with [Tampermonkey](https://www.tampermonkey.net/), [Violentmonkey](https://violentmonkey.github.io/),
+[quoid/userscripts](https://github.com/quoid/userscripts) (Safari), and Greasemonkey 4+ — see
+[Userscript manager compatibility](#userscript-manager-compatibility) below for why that needs calling
+out explicitly.
+
 ## Install
 
-1. Install Tampermonkey (or any GM-compatible userscript manager) in a mobile browser that supports
-   extensions (e.g. Firefox for Android, Kiwi Browser, or desktop Chrome/Firefox for testing).
+1. Install a userscript manager in a mobile browser that supports extensions — Tampermonkey or
+   Violentmonkey on Firefox/Kiwi for Android, [quoid/userscripts](https://github.com/quoid/userscripts)
+   in Safari on iOS/iPadOS/macOS, or Tampermonkey on desktop Chrome/Firefox for testing.
 2. Open [`sponsorblock-mobile.user.js`](./sponsorblock-mobile.user.js) and install it, or create a new
-   script in Tampermonkey and paste the contents in.
+   script in your manager and paste the contents in.
 3. Open `https://m.youtube.com/watch?v=...` and play a video.
 
 `sponsorblock-mobile.user.js` at the repo root is the file to install — a single, plain-JS file with
@@ -51,6 +57,22 @@ recurring bug can't spam you), and the full details always go to the browser con
 (`[SponsorBlock Mobile] Error in ...`) either way. This only ever fires for exceptions inside this
 script — it doesn't hook into YouTube's own error handling, so it won't ever alert you about a YouTube
 bug that has nothing to do with this script.
+
+## Userscript manager compatibility
+
+Userscript managers don't agree on one API surface for storage. Tampermonkey/Violentmonkey grant the
+legacy, underscore-named globals this script's `@grant` lines request (`GM_getValue`, `GM_setValue`,
+`GM_deleteValue`) — sometimes returning a plain value, sometimes a Promise, depending on the manager and
+mode. [quoid/userscripts](https://github.com/quoid/userscripts) (the Safari extension) and Greasemonkey
+4+ only ever implement the modern, dot-namespaced, always-async equivalents (`GM.getValue`, `GM.setValue`,
+`GM.deleteValue`) — the underscore names are simply never granted, silently, with no error. The metadata
+block requests both forms; the code tries the dot form first, falls back to the underscore form, then
+falls back to `localStorage` if neither is granted, and `await`s whichever one actually responds (works
+transparently whether that call returns a value directly or a Promise). `GM_addStyle` isn't requested or
+used at all — CSS injection needs no special privilege, so it's always done with a plain `<style>` tag,
+sidestepping yet another API that varies (or is missing) across managers. `GM_xmlhttpRequest` (the one
+API name every tested manager agrees on) is checked independently of which storage API is available,
+with a 20-second safety timeout in case a manager's `onerror`/`ontimeout` callbacks don't fire.
 
 ## Scope decisions (what this port deliberately leaves out)
 

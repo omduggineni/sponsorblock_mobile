@@ -1,5 +1,3 @@
-import { hasGM } from './config';
-
 const STYLE = `
     .sbm-toast {
         position: fixed;
@@ -216,17 +214,13 @@ const STYLE = `
     .sbm-toggle-chip.active { color: #06233a; border-color: transparent; }
     `;
 
+// Deliberately a plain <style> tag rather than GM_addStyle/GM.addStyle:
+// injecting CSS needs no special privilege (every userscript manager's
+// content script can freely touch the page's own DOM), and GM_addStyle's
+// exact name, calling convention, and availability all vary enough across
+// managers (see config.ts) that it isn't worth depending on for something
+// this simple.
 export function injectStyles(): void {
-    if (hasGM && typeof GM_addStyle === 'function') {
-        try {
-            GM_addStyle(STYLE);
-            return;
-        } catch (e) {
-            // Some GM_addStyle implementations assume document.head already
-            // exists; at @run-at document-start it may not yet. Fall through
-            // to the manual path below, which retries until it does.
-        }
-    }
     const root = document.head || document.documentElement;
     if (!root) {
         // @run-at document-start can fire before <html> exists at all.
