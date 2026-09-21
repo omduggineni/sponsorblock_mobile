@@ -104,7 +104,9 @@ export function openSettings(): void {
             closeSettings();
             openSettings();
         } }),
-        h('div', { class: 'sbm-section-label', text: 'Categories' }),
+        h('div', { class: 'sbm-row-label', style: 'margin-top:20px;' }, [
+            h('b', { text: 'Categories' }),
+        ]),
         ...rows,
         h('div', { class: 'sbm-row-label', style: 'margin-top:14px;' }, [
             h('b', { text: 'Server address' }),
