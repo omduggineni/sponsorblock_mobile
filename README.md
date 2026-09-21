@@ -13,7 +13,9 @@ community port built for touch screens, not an official SponsorBlock release.
    script in Tampermonkey and paste the contents in.
 3. Open `https://m.youtube.com/watch?v=...` and play a video.
 
-The whole extension is one `.user.js` file — no build step, no dependencies.
+`sponsorblock-mobile.user.js` at the repo root is the file to install — a single, plain-JS file with
+no dependencies at install time. It's built from the TypeScript sources in `src/`; see
+[Development](#development) if you want to change the code.
 
 ## Features
 
@@ -77,6 +79,33 @@ video with known segments, driven via Playwright:
 - Network **writes** (`/api/skipSegments` POST, `/api/voteOnSponsorTime`, `/api/viewedVideoSponsorTime`)
   were intercepted and mocked during testing so no synthetic data was ever sent to the production
   SponsorBlock database. Segment **reads** were left live.
+
+## Development
+
+The runtime logic lives in TypeScript modules under `src/`, split by concern:
+
+- `constants.ts` / `types.ts` / `gm.d.ts` — category definitions, shared types, ambient `GM_*` declarations
+- `config.ts` — settings storage (GM storage or `localStorage`), the `Config` object
+- `youtube.ts` — reading the mobile player's DOM (video element, ad state, seek bar, player rect)
+- `sponsorblock-api.ts` — talking to the SponsorBlock server (fetch/vote/submit, the hash-prefix lookup)
+- `dom.ts` / `styles.ts` — a tiny `h()` element builder and the injected CSS
+- `state.ts` / `playback.ts` — per-video playback state and the skip/mute/highlight/navigation logic
+- `ui/` — the toast, manual skip button, highlight chip, seek-bar overlay, settings panel, submission
+  sheet, and floating action buttons
+- `main.ts` — wires everything together; this is the only module allowed to run anything at load time
+  (guards, style injection, `GM_registerMenuCommand`, boot), so that merely importing any other module
+  is always side-effect-free
+
+`npm run build` (`tsc --noEmit` for type-checking, then an esbuild bundle) compiles all of it back into
+the single `sponsorblock-mobile.user.js` at the repo root — the exact same file Tampermonkey installs,
+metadata block included. There's no separate `dist/`; the build output *is* the committed, installable
+file, so always run `npm run build` and commit the result after editing anything in `src/`.
+
+```sh
+npm install
+npm run build       # type-checks, then rebuilds sponsorblock-mobile.user.js
+npm run typecheck   # type-check only, no build
+```
 
 ## Credit
 
