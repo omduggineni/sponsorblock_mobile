@@ -1,5 +1,6 @@
 import { CATEGORIES } from './constants';
 import { Config, hasGM, initConfig } from './config';
+import { reportError } from './errorReporting';
 import { fetchSegments } from './sponsorblock-api';
 import { injectStyles } from './styles';
 import { PlaybackState } from './state';
@@ -25,13 +26,13 @@ function main(): void {
     try {
         initConfig();
     } catch (e) {
-        console.error('[SponsorBlock Mobile] initConfig failed', e);
+        reportError('initConfig', e);
     }
 
     try {
         injectStyles();
     } catch (e) {
-        console.error('[SponsorBlock Mobile] injectStyles failed', e);
+        reportError('injectStyles', e);
     }
 
     try {
@@ -40,7 +41,7 @@ function main(): void {
             GM_registerMenuCommand('Submit a segment', renderSubmitSheet);
         }
     } catch (e) {
-        console.error('[SponsorBlock Mobile] GM_registerMenuCommand failed', e);
+        reportError('GM_registerMenuCommand', e);
     }
 
     boot();
@@ -55,10 +56,18 @@ function boot(): void {
         window.requestAnimationFrame(boot);
         return;
     }
-    createFabRow();
-    window.requestAnimationFrame(tick);
-    setInterval(pollNavigation, 500);
-    pollNavigation();
+    try {
+        createFabRow();
+        window.requestAnimationFrame(tick);
+        setInterval(pollNavigation, 500);
+        pollNavigation();
+    } catch (e) {
+        reportError('boot', e);
+    }
 }
 
-main();
+try {
+    main();
+} catch (e) {
+    reportError('main', e);
+}

@@ -42,6 +42,16 @@ no dependencies at install time. It's built from the TypeScript sources in `src/
 - Works across YouTube's in-page (SPA) navigation — moving from video to video doesn't require a
   page reload for the script to pick up the new video's segments.
 
+## If something breaks
+
+Every entry point of this script (startup, the per-frame skip check, the navigation poller, and every
+button/toggle) is wrapped so a bug in this script's own code can't fail silently. If one of them throws,
+you'll see a single `alert()` naming what broke and the error message (at most once per page load, so a
+recurring bug can't spam you), and the full details always go to the browser console
+(`[SponsorBlock Mobile] Error in ...`) either way. This only ever fires for exceptions inside this
+script — it doesn't hook into YouTube's own error handling, so it won't ever alert you about a YouTube
+bug that has nothing to do with this script.
+
 ## Scope decisions (what this port deliberately leaves out)
 
 This is a from-scratch reimplementation focused on what matters on a phone, not a line-for-line port
@@ -89,6 +99,7 @@ video with known segments, driven via Playwright:
 The runtime logic lives in TypeScript modules under `src/`, split by concern:
 
 - `constants.ts` / `types.ts` / `gm.d.ts` — category definitions, shared types, ambient `GM_*` declarations
+- `errorReporting.ts` — catches bugs in this script's own code (see "If something breaks" below)
 - `config.ts` — settings storage (GM storage or `localStorage`), the `Config` object
 - `youtube.ts` — reading the mobile player's DOM (video element, ad state, seek bar, player rect)
 - `sponsorblock-api.ts` — talking to the SponsorBlock server (fetch/vote/submit, the hash-prefix lookup)

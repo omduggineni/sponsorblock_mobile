@@ -1,5 +1,6 @@
 import { TOAST_DURATION_MS } from '../constants';
 import { categoryLabel, h } from '../dom';
+import { withErrorReporting } from '../errorReporting';
 import { vote } from '../sponsorblock-api';
 import { PlaybackState } from '../state';
 import type { Segment } from '../types';
@@ -55,5 +56,5 @@ export function showSkipToast(segments: Segment[], resumeTime: number): void {
     toast.style.top = (rect.top + rect.height * 0.8) + 'px';
     document.body.appendChild(toast);
     PlaybackState.toastEl = toast;
-    PlaybackState.toastTimer = setTimeout(removeToast, TOAST_DURATION_MS);
+    PlaybackState.toastTimer = setTimeout(withErrorReporting('toast auto-dismiss', removeToast), TOAST_DURATION_MS);
 }

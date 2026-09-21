@@ -1,5 +1,6 @@
 import { Config } from './config';
 import { POI_CHIP_LEAD_IN_SECONDS, SKIP_EPSILON } from './constants';
+import { reportError } from './errorReporting';
 import { fetchSegments, markViewed } from './sponsorblock-api';
 import { PlaybackState, resetPlaybackState } from './state';
 import type { Segment } from './types';
@@ -58,20 +59,27 @@ export function activeCategoryAction(category: string): string {
 }
 
 export function tick(): void {
+    // Reschedule before doing anything else so a throw below never stops
+    // the loop — only reportError() below decides whether to interrupt
+    // the user about it.
     window.requestAnimationFrame(tick);
 
-    if (!Config.enabled) return;
-    const video = getVideo();
-    if (!video || isAdShowing() || video.paused) return;
+    try {
+        if (!Config.enabled) return;
+        const video = getVideo();
+        if (!video || isAdShowing() || video.paused) return;
 
-    const currentVideoID = getVideoIDFromURL(location.href);
-    if (currentVideoID !== PlaybackState.videoID) return; // navigation handled by poller
+        const currentVideoID = getVideoIDFromURL(location.href);
+        if (currentVideoID !== PlaybackState.videoID) return; // navigation handled by poller
 
-    const t = video.currentTime;
+        const t = video.currentTime;
 
-    handleMuteSegments(video, t);
-    handleSkipSegments(video, t);
-    handlePoi(video, t);
+        handleMuteSegments(video, t);
+        handleSkipSegments(video, t);
+        handlePoi(video, t);
+    } catch (error) {
+        reportError('tick', error);
+    }
 }
 
 export function handleMuteSegments(video: HTMLVideoElement, t: number): void {
@@ -164,29 +172,41 @@ export function handlePoi(video: HTMLVideoElement, t: number): void {
  * ------------------------------------------------------------------ */
 
 export async function loadVideo(videoID: string): Promise<void> {
-    resetPlaybackState(videoID);
-    const segments = await fetchSegments(videoID);
-    // Only apply if we're still on the same video (fetch can race navigation).
-    if (PlaybackState.videoID !== videoID) return;
-    PlaybackState.segments = segments;
+    try {
+        resetPlaybackState(videoID);
+        const segments = await fetchSegments(videoID);
+        // Only apply if we're still on the same video (fetch can race navigation).
+        if (PlaybackState.videoID !== videoID) return;
+        PlaybackState.segments = segments;
 
-    // Retro-check: if playback is already inside a segment that just
-    // arrived (e.g. a segment starting at 0), act on it immediately
-    // instead of waiting for the segment to already be behind us.
-    const video = getVideo();
-    if (video && !isAdShowing()) {
-        handleSkipSegments(video, video.currentTime);
-        handleMuteSegments(video, video.currentTime);
+        // Retro-check: if playback is already inside a segment that just
+        // arrived (e.g. a segment starting at 0), act on it immediately
+        // instead of waiting for the segment to already be behind us.
+        const video = getVideo();
+        if (video && !isAdShowing()) {
+            handleSkipSegments(video, video.currentTime);
+            handleMuteSegments(video, video.currentTime);
+        }
+        ensureProgressOverlay();
+        ensureActionBarButton();
+        updateFabVisibility();
+    } catch (error) {
+        reportError('loadVideo', error);
     }
-    ensureProgressOverlay();
-    ensureActionBarButton();
-    updateFabVisibility();
 }
 
 let lastURL: string | null = null;
 let lastVideoElement: HTMLVideoElement | null = null;
 
 export function pollNavigation(): void {
+    try {
+        pollNavigationImpl();
+    } catch (error) {
+        reportError('pollNavigation', error);
+    }
+}
+
+function pollNavigationImpl(): void {
     const href = location.href;
     const videoID = getVideoIDFromURL(href);
 
