@@ -36,6 +36,7 @@
     const STORAGE_PREFIX = 'sbm_';
     const SKIP_EPSILON = 0.15; // seconds of slack when deciding "are we inside this segment"
     const TOAST_DURATION_MS = 4000;
+    const POI_CHIP_LEAD_IN_SECONDS = 20; // how early the highlight chip appears before its timestamp
 
     // Categories we support, in the order they're shown in the settings panel.
     // action: "skip" (auto-skip), "notify" (show a manual skip button), "off"
@@ -45,8 +46,8 @@
         { key: 'interaction', name: 'Interaction Reminder', color: '#cc00ff', supportsMute: true, default: 'skip' },
         { key: 'intro', name: 'Intermission/Intro', color: '#00ffff', supportsMute: true, default: 'skip' },
         { key: 'outro', name: 'Endcards/Credits', color: '#0202ed', supportsMute: true, default: 'skip' },
-        { key: 'preview', name: 'Preview/Recap', color: '#008fd6', supportsMute: true, default: 'notify' },
-        { key: 'hook', name: 'Hook/Greeting', color: '#395699', supportsMute: true, default: 'notify' },
+        { key: 'preview', name: 'Preview/Recap', color: '#008fd6', supportsMute: true, default: 'off' },
+        { key: 'hook', name: 'Hook/Greeting', color: '#395699', supportsMute: true, default: 'off' },
         { key: 'filler', name: 'Tangents/Jokes', color: '#7300ff', supportsMute: true, default: 'off' },
         { key: 'music_offtopic', name: 'Non-Music Section', color: '#ff9900', supportsMute: false, default: 'off' },
         { key: 'poi_highlight', name: 'Highlight', color: '#ff1684', supportsMute: false, default: 'notify', isPoi: true },
@@ -955,10 +956,14 @@
             return;
         }
 
-        if (!PlaybackState.poiShown && !PlaybackState.poiChipEl && t < poi.start - 1) {
+        // Only show the chip in a short lead-up window before the highlight,
+        // not from the moment the video starts — a highlight 10 minutes in
+        // shouldn't nag the viewer for the entire first 10 minutes.
+        const leadInStart = Math.max(0, poi.start - POI_CHIP_LEAD_IN_SECONDS);
+        if (!PlaybackState.poiShown && !PlaybackState.poiChipEl && t >= leadInStart && t < poi.start - 1) {
             showPoiChip(poi);
         }
-        if (PlaybackState.poiChipEl && t >= poi.start - 1) {
+        if (PlaybackState.poiChipEl && (t >= poi.start - 1 || t < leadInStart)) {
             removePoiChip();
         }
     }
