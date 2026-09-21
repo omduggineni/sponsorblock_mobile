@@ -1,0 +1,18 @@
+// ==UserScript==
+// @name         SponsorBlock for YouTube Mobile
+// @namespace    https://github.com/sponsorblock-mobile
+// @version      1.0.0
+// @description  Skips sponsor segments, self-promo, intros and more on m.youtube.com using the crowdsourced SponsorBlock database. Includes submission, voting, and a settings panel built for touch.
+// @author       SponsorBlock Mobile (community port)
+// @match        https://m.youtube.com/*
+// @match        https://www.youtube.com/*
+// @icon         https://sponsor.ajay.app/favicon.ico
+// @grant        GM_getValue
+// @grant        GM_setValue
+// @grant        GM_deleteValue
+// @grant        GM_xmlhttpRequest
+// @grant        GM_registerMenuCommand
+// @grant        GM_addStyle
+// @connect      sponsor.ajay.app
+// @run-at       document-start
+// ==/UserScript==
