@@ -174,3 +174,9 @@ top-level `"use strict"` directive — see the compatibility note above for why 
 
 Built with the [ajayyy/SponsorBlock](https://github.com/ajayyy/SponsorBlock) source as a reference for
 category definitions, colors, and API shapes. All code here is an independent reimplementation.
+
+Last checked against upstream at commit
+[`914e2c8`](https://github.com/ajayyy/SponsorBlock/commit/914e2c88d4f80be9bcf3b3299f155c703ee99061)
+(5 commits past release tag `6.1.7`, 2026-09-13). If `src/constants.ts`'s `CATEGORIES` list, colors, or
+`src/sponsorblock-api.ts`'s request/response shapes look stale against current upstream, that's the
+commit to diff from.
