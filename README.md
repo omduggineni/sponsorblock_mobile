@@ -35,6 +35,10 @@ no dependencies at install time. It's built from the TypeScript sources in `src/
 - **Settings panel** — a `⚙` button opens per-category controls (Off / Manual / Auto-skip), a master
   enable switch, a seek-bar-overlay toggle, a server address override, and running stats (segments
   skipped, time saved).
+- **Nothing floats on screen until you ask for it** — a small SponsorBlock icon (⏭) sits in the same
+  row as YouTube's own like/dislike/share/save/report buttons, below the title. The settings and
+  submit buttons only appear (as a small floating pair, bottom-right) once you tap it, and tapping it
+  again hides them.
 - Works across YouTube's in-page (SPA) navigation — moving from video to video doesn't require a
   page reload for the script to pick up the new video's segments.
 
@@ -91,7 +95,7 @@ The runtime logic lives in TypeScript modules under `src/`, split by concern:
 - `dom.ts` / `styles.ts` — a tiny `h()` element builder and the injected CSS
 - `state.ts` / `playback.ts` — per-video playback state and the skip/mute/highlight/navigation logic
 - `ui/` — the toast, manual skip button, highlight chip, seek-bar overlay, settings panel, submission
-  sheet, and floating action buttons
+  sheet, and the action-bar icon + floating settings/submit buttons it toggles
 - `main.ts` — wires everything together; it's the only module that performs side effects at load time
   (guards, style injection, `GM_registerMenuCommand`, boot) — other modules may build inert objects/Maps
   at module scope, but none of them read storage, touch the DOM, or call a `GM_*` API just by being

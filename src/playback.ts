@@ -7,7 +7,7 @@ import { showManualButton, removeManualButton } from './ui/manualButton';
 import { showPoiChip, removePoiChip } from './ui/poiChip';
 import { ensureProgressOverlay } from './ui/progressOverlay';
 import { showSkipToast } from './ui/toast';
-import { updateFabVisibility } from './ui/fab';
+import { ensureActionBarButton, updateFabVisibility } from './ui/fab';
 import { getVideo, getVideoIDFromURL, isAdShowing } from './youtube';
 
 /* ------------------------------------------------------------------ *
@@ -179,6 +179,7 @@ export async function loadVideo(videoID: string): Promise<void> {
         handleMuteSegments(video, video.currentTime);
     }
     ensureProgressOverlay();
+    ensureActionBarButton();
     updateFabVisibility();
 }
 
@@ -208,5 +209,6 @@ export function pollNavigation(): void {
     }
 
     ensureProgressOverlay();
+    ensureActionBarButton();
     updateFabVisibility();
 }

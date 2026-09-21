@@ -80,11 +80,26 @@ const STYLE = `
         position: fixed;
         right: 10px;
         bottom: 90px;
-        display: flex;
+        display: none;
         flex-direction: column;
         gap: 10px;
         z-index: 2147483000;
     }
+    .sbm-action-bar-btn {
+        flex: 0 0 auto;
+        width: 48px;
+        height: 48px;
+        background: transparent;
+        border: none;
+        border-radius: 50%;
+        color: inherit;
+        font-size: 21px;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .sbm-action-bar-btn:active { background: rgba(128,128,128,0.2); }
     .sbm-fab {
         width: 46px;
         height: 46px;
