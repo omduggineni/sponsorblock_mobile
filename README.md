@@ -92,9 +92,10 @@ The runtime logic lives in TypeScript modules under `src/`, split by concern:
 - `state.ts` / `playback.ts` — per-video playback state and the skip/mute/highlight/navigation logic
 - `ui/` — the toast, manual skip button, highlight chip, seek-bar overlay, settings panel, submission
   sheet, and floating action buttons
-- `main.ts` — wires everything together; this is the only module allowed to run anything at load time
-  (guards, style injection, `GM_registerMenuCommand`, boot), so that merely importing any other module
-  is always side-effect-free
+- `main.ts` — wires everything together; it's the only module that performs side effects at load time
+  (guards, style injection, `GM_registerMenuCommand`, boot) — other modules may build inert objects/Maps
+  at module scope, but none of them read storage, touch the DOM, or call a `GM_*` API just by being
+  imported
 
 `npm run build` (`tsc --noEmit` for type-checking, then an esbuild bundle) compiles all of it back into
 the single `sponsorblock-mobile.user.js` at the repo root — the exact same file Tampermonkey installs,
