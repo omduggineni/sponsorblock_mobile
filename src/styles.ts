@@ -203,8 +203,14 @@ const STYLE = `
 
 export function injectStyles(): void {
     if (hasGM && typeof GM_addStyle === 'function') {
-        GM_addStyle(STYLE);
-        return;
+        try {
+            GM_addStyle(STYLE);
+            return;
+        } catch (e) {
+            // Some GM_addStyle implementations assume document.head already
+            // exists; at @run-at document-start it may not yet. Fall through
+            // to the manual path below, which retries until it does.
+        }
     }
     const root = document.head || document.documentElement;
     if (!root) {
