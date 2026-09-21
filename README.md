@@ -97,9 +97,11 @@ The runtime logic lives in TypeScript modules under `src/`, split by concern:
   at module scope, but none of them read storage, touch the DOM, or call a `GM_*` API just by being
   imported
 
-`npm run build` (`tsc --noEmit` for type-checking, then an esbuild bundle) compiles all of it back into
-the single `sponsorblock-mobile.user.js` at the repo root — the exact same file Tampermonkey installs,
-metadata block included. There's no separate `dist/`; the build output *is* the committed, installable
+`npm run build` (`tsc --noEmit` for type-checking, then an esbuild bundle, minified) compiles all of it
+back into the single `sponsorblock-mobile.user.js` at the repo root — the exact same file Tampermonkey
+installs, metadata block kept as readable, unminified comment lines (Tampermonkey parses those `// @…`
+directives, and esbuild's banner is inserted verbatim, outside the minifier). There's no separate
+`dist/`; the build output *is* the committed, installable
 file, so always run `npm run build` and commit the result after editing anything in `src/`.
 
 ```sh
