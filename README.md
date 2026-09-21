@@ -74,6 +74,14 @@ sidestepping yet another API that varies (or is missing) across managers. `GM_xm
 API name every tested manager agrees on) is checked independently of which storage API is available,
 with a 20-second safety timeout in case a manager's `onerror`/`ontimeout` callbacks don't fire.
 
+There's also a build-level compatibility fix: esbuild prepends a top-level `"use strict";` directive
+when bundling ES module sources to IIFE format. quoid/userscripts injects `@grant`'d scripts by wrapping
+the entire file as the body of `Function(paramList, code)`, where `paramList` is a destructured
+parameter list (the granted APIs) — and per the spec, a `'use strict'` directive combined with a
+non-simple parameter list is a SyntaxError, which some WebKit builds enforce aggressively enough that
+the script fails to parse at all (`build.mjs` strips that directive from the output; the code doesn't
+rely on strict-only semantics, so this is safe for every manager).
+
 ## Scope decisions (what this port deliberately leaves out)
 
 This is a from-scratch reimplementation focused on what matters on a phone, not a line-for-line port
