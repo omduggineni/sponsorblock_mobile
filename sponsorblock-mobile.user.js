@@ -359,7 +359,13 @@
     }
     .sbm-progress-overlay {
         position: absolute;
-        inset: 0;
+        left: 0;
+        right: 0;
+        /* top/height are set inline to match the real (thin) seek bar line;
+           the host element itself is a much taller touch target. */
+        top: 50%;
+        height: 3px;
+        transform: translateY(-50%);
         pointer-events: none;
         z-index: 3;
     }
@@ -745,6 +751,28 @@
         document.querySelectorAll('.sbm-progress-overlay').forEach((el) => el.remove());
     }
 
+    // The progress bar's host element is a large touch target (~40+px tall);
+    // the actual visible line is a ~3px strip roughly centered inside it. Size
+    // our overlay to match that real line rather than filling the whole host,
+    // or the colored segments render as tall blocks instead of a thin bar.
+    function sizeOverlayToTrack(host, overlay) {
+        const line = host.querySelector('yt-progress-bar-line, .ytProgressBarLineHost');
+        if (line) {
+            const hostRect = host.getBoundingClientRect();
+            const lineRect = line.getBoundingClientRect();
+            if (hostRect.height > 0 && lineRect.height > 0) {
+                overlay.style.top = (lineRect.top - hostRect.top) + 'px';
+                overlay.style.height = lineRect.height + 'px';
+                overlay.style.transform = 'none';
+                return;
+            }
+        }
+        // Fallback: thin bar vertically centered in the host (CSS default).
+        overlay.style.top = '';
+        overlay.style.height = '';
+        overlay.style.transform = '';
+    }
+
     function ensureProgressOverlay() {
         if (!Config.showProgressBarSegments) {
             removeProgressOverlay();
@@ -763,6 +791,8 @@
             host.appendChild(overlay);
             overlay.dataset.videoId = '';
         }
+
+        sizeOverlayToTrack(host, overlay);
 
         if (overlay.dataset.videoId === PlaybackState.videoID && overlay.dataset.count === String(PlaybackState.segments.length)) {
             return; // already built for this video
