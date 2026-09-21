@@ -136,7 +136,9 @@ The runtime logic lives in TypeScript modules under `src/`, split by concern:
 - `config.ts` — settings storage (GM storage or `localStorage`), the `Config` object
 - `youtube.ts` — reading the mobile player's DOM (video element, ad state, seek bar, player rect)
 - `sponsorblock-api.ts` — talking to the SponsorBlock server (fetch/vote/submit, the hash-prefix lookup)
-- `dom.ts` / `styles.ts` — a tiny `h()` element builder and the injected CSS
+- `dom.ts` — a tiny `h()` element builder
+- `styles.css` / `styles.ts` — the injected CSS, authored as a normal stylesheet and injected via a
+  plain `<style>` tag at runtime (`styles.ts` just owns that injection, plus the document-start retry)
 - `state.ts` / `playback.ts` — per-video playback state and the skip/mute/highlight/navigation logic
 - `ui/` — the toast, manual skip button, highlight chip, seek-bar overlay, settings panel, submission
   sheet, and the action-bar icon + floating settings/submit buttons it toggles
@@ -148,7 +150,11 @@ The runtime logic lives in TypeScript modules under `src/`, split by concern:
 `npm run build` (`tsc --noEmit` for type-checking, then an esbuild bundle, minified) compiles all of it
 back into the single `sponsorblock-mobile.user.js` at the repo root — the exact same file Tampermonkey
 installs, metadata block kept as readable, unminified comment lines (Tampermonkey parses those `// @…`
-directives, and esbuild's banner is inserted verbatim, outside the minifier). There's no separate
+directives, and esbuild's banner is inserted verbatim, outside the minifier). `styles.css` gets its own
+minification pass (via a small esbuild plugin in `build.mjs` that runs each `.css` import through
+esbuild's CSS minifier) before being inlined as the string `styles.ts` injects at runtime — a userscript
+ships as one file, so there's nowhere for a real stylesheet to live, but the source can still be
+authored, linted, and diffed as one. There's no separate
 `dist/`; the build output *is* the committed, installable
 file, so always run `npm run build` and commit the result after editing anything in `src/`.
 
