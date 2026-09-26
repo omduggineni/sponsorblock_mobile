@@ -48,12 +48,33 @@
     transform: translateX(-50%);
     background: rgba(20,20,20,0.88);
     color: #fff;
-    border: none;
     border-radius: 999px;
-    padding: 8px 14px;
+    padding: 8px 8px 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font: 600 12px/1 Roboto, Arial, sans-serif;
     z-index: 2147483000;
     pointer-events: auto;
+}
+.sbm-poi-chip button {
+    background: none;
+    border: none;
+    color: #fff;
+    font: 600 12px/1 Roboto, Arial, sans-serif;
+    white-space: nowrap;
+}
+.sbm-poi-chip .sbm-poi-chip-close {
+    background: rgba(255,255,255,0.14);
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    font-size: 15px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 .sbm-progress-overlay {
     position: absolute;

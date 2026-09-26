@@ -34,8 +34,10 @@ no dependencies at install time. It's built from the TypeScript sources in `src/
   highlights by default) — a pill button appears while the segment is active; tap it to jump past.
 - **Mute segments** — some categories are submitted as "mute" rather than "skip"; the script mutes
   audio for the segment's duration and restores your previous mute state afterwards.
-- **Highlight ("POI") jump** — a "★ Jump to highlight" chip appears before a video's most-replayed
-  moment, per SponsorBlock's highlight category, and the moment itself is marked on the seek bar as a
+- **Highlight ("POI") jump** — a "★ Jump to highlight" chip appears any time before a video's
+  most-replayed moment (including right at load, if playback starts partway through), per
+  SponsorBlock's highlight category. It stays up until you tap it, close it, or 5 seconds pass, and
+  the moment itself is marked on the seek bar as a
   small tick (it's a single point in time, not a range, so it doesn't get a colored segment like the
   others).
 - **Skip notice with Undo** — every auto-skip shows a toast with an Undo button; tapping it seeks back

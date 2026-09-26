@@ -5,7 +5,7 @@ export const USER_AGENT = 'github/omduggineni/sponsorblock_mobile';
 export const STORAGE_PREFIX = 'sbm_';
 export const SKIP_EPSILON = 0.15; // seconds of slack when deciding "are we inside this segment"
 export const TOAST_DURATION_MS = 4000;
-export const POI_CHIP_LEAD_IN_SECONDS = 20; // how early the highlight chip appears before its timestamp
+export const POI_CHIP_AUTO_DISMISS_MS = 5000; // how long the highlight chip stays up before hiding itself
 
 // Categories we support, in the order they're shown in the settings panel.
 // action: "skip" (auto-skip), "notify" (show a manual skip button), "off"

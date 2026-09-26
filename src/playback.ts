@@ -1,5 +1,5 @@
 import { Config } from './config';
-import { POI_CHIP_LEAD_IN_SECONDS, SKIP_EPSILON } from './constants';
+import { SKIP_EPSILON } from './constants';
 import { reportError } from './errorReporting';
 import { fetchSegments, markViewed } from './sponsorblock-api';
 import { PlaybackState, resetPlaybackState } from './state';
@@ -155,14 +155,14 @@ export function handlePoi(video: HTMLVideoElement, t: number): void {
         return;
     }
 
-    // Only show the chip in a short lead-up window before the highlight,
-    // not from the moment the video starts — a highlight 10 minutes in
-    // shouldn't nag the viewer for the entire first 10 minutes.
-    const leadInStart = Math.max(0, poi.start - POI_CHIP_LEAD_IN_SECONDS);
-    if (!PlaybackState.poiShown && !PlaybackState.poiChipEl && t >= leadInStart && t < poi.start - 1) {
+    // Shown as soon as a highlight is upcoming — whether that's from the
+    // very start of the video or because playback loaded partway through,
+    // before the highlight — and left up until the viewer taps it, closes
+    // it, or its own auto-dismiss timer runs out (see poiChip.ts).
+    if (!PlaybackState.poiShown && !PlaybackState.poiChipEl && t < poi.start - 1) {
         showPoiChip(poi);
     }
-    if (PlaybackState.poiChipEl && (t >= poi.start - 1 || t < leadInStart)) {
+    if (PlaybackState.poiChipEl && t >= poi.start - 1) {
         removePoiChip();
     }
 }

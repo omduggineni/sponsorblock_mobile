@@ -20,6 +20,7 @@ export interface PlaybackStateShape {
     manualBtnEl: HTMLElement | null;
     manualBtnUUID: string | null;
     poiChipEl: HTMLElement | null;
+    poiChipTimer: ReturnType<typeof setTimeout> | null;
 }
 
 export const PlaybackState: PlaybackStateShape = {
@@ -38,6 +39,7 @@ export const PlaybackState: PlaybackStateShape = {
     manualBtnEl: null,
     manualBtnUUID: null,
     poiChipEl: null,
+    poiChipTimer: null,
 };
 
 export function resetPlaybackState(newVideoID: string | null): void {
