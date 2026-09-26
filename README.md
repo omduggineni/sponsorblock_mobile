@@ -1,16 +1,18 @@
-# SponsorBlock for YouTube Mobile
+# SponsorBlock for YouTube Mobile Web
 
-A single-file userscript that brings SponsorBlock to `m.youtube.com` (the mobile web player). It talks
-to the same public, crowdsourced database as the
-[official SponsorBlock extension](https://github.com/ajayyy/SponsorBlock) — this is an independent,
-community port built for touch screens, not an official SponsorBlock release.
+A single-file userscript that brings SponsorBlock to `m.youtube.com` (the mobile web player). Uses the same database as the
+[official SponsorBlock extension](https://github.com/ajayyy/SponsorBlock).
+
+I reimplemented 
+
+This is most useful on iOS (because installing alternative frontends like NewPipe is hard there), but it should in theory work in any browser that supports userscripts
 
 Works with [Tampermonkey](https://www.tampermonkey.net/), [Violentmonkey](https://violentmonkey.github.io/),
 [quoid/userscripts](https://github.com/quoid/userscripts) (Safari), and Greasemonkey 4+ — see
 [Userscript manager compatibility](#userscript-manager-compatibility) below for why that needs calling
 out explicitly.
 
-Licensed under GPL v3 (same as original SponsorBlock extension)
+Licensed under GPL v3 (same as original SponsorBlock extension).
 
 ## Install
 
@@ -130,6 +132,10 @@ video with known segments, driven via Playwright:
   SponsorBlock database. Segment **reads** were left live.
 
 ## Development
+
+I tried something a bit new with this userscript - I wanted to develop it in TypeScript, 
+using a modular architecture so that the code that interfaces with the YouTube UI could be properly 
+decoupled from the 
 
 The runtime logic lives in TypeScript modules under `src/`, split by concern:
 
