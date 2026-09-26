@@ -1,7 +1,7 @@
 import type { CategoryDef } from './types';
 
 export const DEFAULT_SERVER = 'https://sponsor.ajay.app';
-export const USER_AGENT = 'SponsorBlockMobileUserscript/1.0.0';
+export const USER_AGENT = 'github/omduggineni/sponsorblock_mobile';
 export const STORAGE_PREFIX = 'sbm_';
 export const SKIP_EPSILON = 0.15; // seconds of slack when deciding "are we inside this segment"
 export const TOAST_DURATION_MS = 4000;
