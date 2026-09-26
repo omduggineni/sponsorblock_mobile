@@ -177,3 +177,7 @@ top-level `"use strict"` directive — see the compatibility note above for why 
 Built with the [ajayyy/SponsorBlock](https://github.com/ajayyy/SponsorBlock) source as a reference for
 category definitions, colors, and API shapes. All code here is an independent reimplementation. See
 [NOTES.md](./NOTES.md) for which upstream commit this was last checked against.
+
+## License
+
+GPLv3 — see [LICENSE](./LICENSE).

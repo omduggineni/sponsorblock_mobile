@@ -3,6 +3,7 @@
   "version": "1.4.3",
   "private": true,
   "description": "SponsorBlock userscript for m.youtube.com, built from TypeScript modules into a single .user.js",
+  "license": "GPL-3.0-or-later",
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "npm run typecheck && node build.mjs"

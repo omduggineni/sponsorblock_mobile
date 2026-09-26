@@ -4,6 +4,7 @@
 // @version      1.4.3
 // @description  Skips sponsor segments, self-promo, intros and more on m.youtube.com using the crowdsourced SponsorBlock database. Includes submission, voting, and a settings panel built for touch.
 // @author       SponsorBlock Mobile (community port)
+// @license      GPL-3.0-or-later
 // @match        https://m.youtube.com/*
 // @match        https://www.youtube.com/*
 // @icon         https://sponsor.ajay.app/favicon.ico
