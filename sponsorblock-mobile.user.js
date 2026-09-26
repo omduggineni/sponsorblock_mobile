@@ -8,6 +8,7 @@
 // @match        https://m.youtube.com/*
 // @match        https://www.youtube.com/*
 // @icon         https://sponsor.ajay.app/favicon.ico
+// @supportURL   https://github.com/omduggineni/sponsorblock_mobile/issues
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_deleteValue
