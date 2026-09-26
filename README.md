@@ -10,6 +10,8 @@ Works with [Tampermonkey](https://www.tampermonkey.net/), [Violentmonkey](https:
 [Userscript manager compatibility](#userscript-manager-compatibility) below for why that needs calling
 out explicitly.
 
+Licensed under GPL v3 (same as original SponsorBlock extension)
+
 ## Install
 
 1. Install a userscript manager in a mobile browser that supports extensions — Tampermonkey or
